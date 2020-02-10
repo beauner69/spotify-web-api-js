@@ -105,6 +105,10 @@ var SpotifyWebApi = (function() {
       })
       .then(json => {
         if (callback) callback(json);
+        if (json.error !== undefined)
+          throw new Error(
+            "Spotify: " + json.error.message + " / " + json.error.status
+          );
         return json;
       });
   };

@@ -1,7 +1,10 @@
 // Type definitions for The Spotify Web API (including changes March 29th 2016)
 // Project: https://developer.spotify.com/web-api/
 // Definitions by: Niels Kristian Hansen Skovmand <https://github.com/skovmand>
+//                 Magnar Ovedal Myrtveit <https://github.com/Stadly>
+//                 Nils Måsén <https://github.com/piksel>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+// TypeScript Version: 2.2
 
 // Release comments:
 // -----------------
@@ -136,6 +139,10 @@ declare namespace SpotifyApi {
         position_ms?: number;
     }
 
+    interface RestrictionsObject {
+        reason: string
+    }
+
     //
     // Responses from the Spotify Web API in the same order as in the API endpoint docs seen here:
     // [API Endpoint Reference](https://developer.spotify.com/web-api/endpoint-reference/)
@@ -146,7 +153,7 @@ declare namespace SpotifyApi {
     /**
      * Void Response
      */
-    interface VoidResponse {}
+    interface VoidResponse { }
 
     /**
      * Response with Playlist Snapshot
@@ -154,6 +161,7 @@ declare namespace SpotifyApi {
     interface PlaylistSnapshotResponse {
         snapshot_id: string
     }
+
 
     // Spotify API Endpoints:
 
@@ -163,7 +171,7 @@ declare namespace SpotifyApi {
      * GET /v1/albums/{id}
      * https://developer.spotify.com/web-api/get-album/
      */
-    interface SingleAlbumResponse extends AlbumObjectFull {}
+    interface SingleAlbumResponse extends AlbumObjectFull { }
 
     /**
      * Get Several Albums
@@ -181,7 +189,7 @@ declare namespace SpotifyApi {
      * GET /v1/albums/{id}/tracks
      * https://developer.spotify.com/web-api/get-albums-tracks/
      */
-    interface AlbumTracksResponse extends PagingObject<TrackObjectSimplified> {}
+    interface AlbumTracksResponse extends PagingObject<TrackObjectSimplified> { }
 
     /**
      * Get an Artist
@@ -189,7 +197,7 @@ declare namespace SpotifyApi {
      * GET /v1/artists/{id}
      * https://developer.spotify.com/web-api/get-artist/
      */
-    interface SingleArtistResponse extends ArtistObjectFull {}
+    interface SingleArtistResponse extends ArtistObjectFull { }
 
     /**
      * Get Several Artists
@@ -207,7 +215,7 @@ declare namespace SpotifyApi {
      * GET /v1/artists/{id}/albums
      * https://developer.spotify.com/web-api/get-artists-albums/
      */
-    interface ArtistsAlbumsResponse extends PagingObject<AlbumObjectSimplified> {}
+    interface ArtistsAlbumsResponse extends PagingObject<AlbumObjectSimplified> { }
 
     /**
      * Get an Artist’s Top Tracks
@@ -238,7 +246,7 @@ declare namespace SpotifyApi {
      * At the time of typing, the Audio Analysis Object is absent from the Object Model, so it is typed as any.
      * Object Model: https://developer.spotify.com/web-api/object-model/
      */
-    interface AudioAnalysisResponse extends Object {}
+    interface AudioAnalysisResponse extends Object { }
 
     /**
      * Get audio features for a track
@@ -246,7 +254,7 @@ declare namespace SpotifyApi {
      * GET /v1/audio-features/{id}
      * https://developer.spotify.com/web-api/get-audio-features/
      */
-    interface AudioFeaturesResponse extends AudioFeaturesObject {}
+    interface AudioFeaturesResponse extends AudioFeaturesObject { }
 
     /**
      * Get audio features for several tracks
@@ -296,7 +304,7 @@ declare namespace SpotifyApi {
      * GET /v1/browse/categories/{id}
      * https://developer.spotify.com/web-api/get-category/
      */
-    interface SingleCategoryResponse extends CategoryObject {}
+    interface SingleCategoryResponse extends CategoryObject { }
 
     /**
      * Get a categorys playlists
@@ -314,7 +322,7 @@ declare namespace SpotifyApi {
      * GET /v1/me
      * https://developer.spotify.com/web-api/get-current-users-profile/
      */
-    interface CurrentUsersProfileResponse extends UserObjectPrivate {}
+    interface CurrentUsersProfileResponse extends UserObjectPrivate { }
 
     /**
      * Get User’s Followed Artists
@@ -332,7 +340,7 @@ declare namespace SpotifyApi {
      * PUT /v1/me/following
      * https://developer.spotify.com/web-api/follow-artists-users/
      */
-    interface FollowArtistsOrUsersResponse extends VoidResponse {}
+    interface FollowArtistsOrUsersResponse extends VoidResponse { }
 
     /**
      * Unfollow artists or users
@@ -340,7 +348,7 @@ declare namespace SpotifyApi {
      * DELETE /v1/me/following
      * https://developer.spotify.com/web-api/unfollow-artists-users/
      */
-    interface UnfollowArtistsOrUsersResponse extends VoidResponse {}
+    interface UnfollowArtistsOrUsersResponse extends VoidResponse { }
 
     /**
      * Check if User Follows Users or Artists
@@ -348,7 +356,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/following/contains
      * https://developer.spotify.com/web-api/check-current-user-follows/
      */
-    interface UserFollowsUsersOrArtistsResponse extends Array<boolean> {}
+    interface UserFollowsUsersOrArtistsResponse extends Array<boolean> { }
 
     /**
      * Follow a Playlist
@@ -356,7 +364,7 @@ declare namespace SpotifyApi {
      * PUT /v1/users/{owner_id}/playlists/{playlist_id}/followers
      * https://developer.spotify.com/web-api/follow-playlist/
      */
-    interface FollowPlaylistReponse extends VoidResponse {}
+    interface FollowPlaylistReponse extends VoidResponse { }
 
     /**
      * Unfollow a Playlist
@@ -364,7 +372,7 @@ declare namespace SpotifyApi {
      * DELETE /v1/users/{owner_id}/playlists/{playlist_id}/followers
      * https://developer.spotify.com/web-api/unfollow-playlist/
      */
-    interface UnfollowPlaylistReponse extends VoidResponse {}
+    interface UnfollowPlaylistReponse extends VoidResponse { }
 
     /**
      * Save tracks for user
@@ -372,7 +380,7 @@ declare namespace SpotifyApi {
      * PUT /v1/me/tracks?ids={ids}
      * https://developer.spotify.com/web-api/save-tracks-user/
      */
-    interface SaveTracksForUserResponse extends VoidResponse {}
+    interface SaveTracksForUserResponse extends VoidResponse { }
 
     /**
      * Get user's saved tracks
@@ -380,7 +388,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/tracks
      * https://developer.spotify.com/web-api/get-users-saved-tracks/
      */
-    interface UsersSavedTracksResponse extends PagingObject<SavedTrackObject> {}
+    interface UsersSavedTracksResponse extends PagingObject<SavedTrackObject> { }
 
     /**
      * Remove User’s Saved Tracks
@@ -388,7 +396,7 @@ declare namespace SpotifyApi {
      * DELETE /v1/me/tracks?ids={ids}
      * https://developer.spotify.com/web-api/remove-tracks-user/
      */
-    interface RemoveUsersSavedTracksResponse extends VoidResponse {}
+    interface RemoveUsersSavedTracksResponse extends VoidResponse { }
 
     /**
      * Check User’s Saved Tracks
@@ -396,7 +404,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/tracks/contains?ids={ids}
      * https://developer.spotify.com/web-api/check-users-saved-tracks/
      */
-    interface CheckUsersSavedTracksResponse extends Array<boolean> {}
+    interface CheckUsersSavedTracksResponse extends Array<boolean> { }
 
     /**
      * Save albums for user
@@ -404,7 +412,7 @@ declare namespace SpotifyApi {
      * PUT /v1/me/albums?ids={ids}
      * https://developer.spotify.com/web-api/save-albums-user/
      */
-    interface SaveAlbumsForUserResponse extends VoidResponse {}
+    interface SaveAlbumsForUserResponse extends VoidResponse { }
 
     /**
      * Get user's saved albums
@@ -412,7 +420,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/albums
      * https://developer.spotify.com/web-api/get-users-saved-albums/
      */
-    interface UsersSavedAlbumsResponse extends PagingObject<SavedAlbumObject> {}
+    interface UsersSavedAlbumsResponse extends PagingObject<SavedAlbumObject> { }
 
     /**
      * Remove Albums for Current User
@@ -420,7 +428,7 @@ declare namespace SpotifyApi {
      * DELETE /v1/me/albums?ids={ids}
      * https://developer.spotify.com/web-api/remove-albums-user/
      */
-    interface RemoveAlbumsForUserResponse extends VoidResponse {}
+    interface RemoveAlbumsForUserResponse extends VoidResponse { }
 
     /**
      * Check user's saved albums
@@ -428,7 +436,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/albums/contains?ids={ids}
      * https://developer.spotify.com/web-api/check-users-saved-albums/
      */
-    interface CheckUserSavedAlbumsResponse extends Array<boolean> {}
+    interface CheckUserSavedAlbumsResponse extends Array<boolean> { }
 
     /**
      * Get a User’s Top Artists and Tracks (Note: This is only Artists)
@@ -436,7 +444,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/top/{type}
      * https://developer.spotify.com/web-api/get-users-top-artists-and-tracks/
      */
-    interface UsersTopArtistsResponse extends PagingObject<ArtistObjectFull> {}
+    interface UsersTopArtistsResponse extends PagingObject<ArtistObjectFull> { }
 
     /**
      * Get a User’s Top Artists and Tracks (Note: This is only Tracks)
@@ -444,7 +452,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/top/{type}
      * https://developer.spotify.com/web-api/get-users-top-artists-and-tracks/
      */
-    interface UsersTopTracksResponse extends PagingObject<TrackObjectFull> {}
+    interface UsersTopTracksResponse extends PagingObject<TrackObjectFull> { }
 
     /**
      * Get a User’s Recently Played Tracks
@@ -452,7 +460,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/player/recently-played
      * https://developer.spotify.com/web-api/get-users-top-artists-and-tracks/
      */
-    interface UsersRecentlyPlayedTracksResponse extends CursorBasedPagingObject<PlayHistoryObject> {}
+    interface UsersRecentlyPlayedTracksResponse extends CursorBasedPagingObject<PlayHistoryObject> { }
 
     /**
      * Get recommendations based on seeds
@@ -460,7 +468,7 @@ declare namespace SpotifyApi {
      * GET /v1/recommendations
      * https://developer.spotify.com/get-recommendations/
      */
-    interface RecommendationsFromSeedsResponse extends RecommendationsObject {}
+    interface RecommendationsFromSeedsResponse extends RecommendationsObject { }
 
     /**
      * Get available genre seeds
@@ -519,7 +527,7 @@ declare namespace SpotifyApi {
      * https://developer.spotify.com/web-api/search-item/
      */
     interface SearchResponse extends Partial<ArtistSearchResponse>, Partial<AlbumSearchResponse>, Partial<TrackSearchResponse>, Partial<PlaylistSearchResponse> {
-      
+
     }
 
     /**
@@ -528,7 +536,7 @@ declare namespace SpotifyApi {
      * GET /v1/tracks/{id}
      * https://developer.spotify.com/web-api/get-track/
      */
-    interface SingleTrackResponse extends TrackObjectFull {}
+    interface SingleTrackResponse extends TrackObjectFull { }
 
     /**
      * Get multiple tracks
@@ -546,7 +554,7 @@ declare namespace SpotifyApi {
      * GET /v1/users/{user_id}
      * https://developer.spotify.com/web-api/get-users-profile/
      */
-    interface UserProfileResponse extends UserObjectPublic {}
+    interface UserProfileResponse extends UserObjectPublic { }
 
     /**
      * Get a list of a user's playlists
@@ -554,7 +562,7 @@ declare namespace SpotifyApi {
      * GET /v1/users/{user_id}/playlists
      * https://developer.spotify.com/web-api/get-list-users-playlists/
      */
-    interface ListOfUsersPlaylistsResponse extends PagingObject<PlaylistObjectSimplified> {}
+    interface ListOfUsersPlaylistsResponse extends PagingObject<PlaylistObjectSimplified> { }
 
     /**
      * Get a list of the current user's playlists
@@ -562,7 +570,7 @@ declare namespace SpotifyApi {
      * GET /v1/me/playlists
      * https://developer.spotify.com/web-api/get-list-users-playlists/
      */
-    interface ListOfCurrentUsersPlaylistsResponse extends PagingObject<PlaylistObjectSimplified> {}
+    interface ListOfCurrentUsersPlaylistsResponse extends PagingObject<PlaylistObjectSimplified> { }
 
     /**
      * Get a playlist
@@ -570,7 +578,7 @@ declare namespace SpotifyApi {
      * GET /v1/users/{user_id}/playlists/{playlist_id}
      * https://developer.spotify.com/web-api/get-playlist/
      */
-    interface SinglePlaylistResponse extends PlaylistObjectFull {}
+    interface SinglePlaylistResponse extends PlaylistObjectFull { }
 
     /**
      * Get a playlist's tracks
@@ -578,7 +586,7 @@ declare namespace SpotifyApi {
      * GET /v1/users/{user_id}/playlists/{playlist_id}/tracks
      * https://developer.spotify.com/web-api/get-playlists-tracks/
      */
-    interface PlaylistTrackResponse extends PagingObject<PlaylistTrackObject> {}
+    interface PlaylistTrackResponse extends PagingObject<PlaylistTrackObject> { }
 
     /**
      * Create a Playlist
@@ -586,7 +594,7 @@ declare namespace SpotifyApi {
      * POST /v1/users/{user_id}/playlists
      * https://developer.spotify.com/web-api/create-playlist/
      */
-    interface CreatePlaylistResponse extends PlaylistObjectFull {}
+    interface CreatePlaylistResponse extends PlaylistObjectFull { }
 
     /**
      * Change a Playlist’s Details
@@ -594,7 +602,7 @@ declare namespace SpotifyApi {
      * PUT /v1/users/{user_id}/playlists/{playlist_id}
      * https://developer.spotify.com/web-api/change-playlist-details/
      */
-    interface ChangePlaylistDetailsReponse extends VoidResponse {}
+    interface ChangePlaylistDetailsReponse extends VoidResponse { }
 
     /**
      * Add Tracks to a Playlist
@@ -602,7 +610,7 @@ declare namespace SpotifyApi {
      * POST /v1/users/{user_id}/playlists/{playlist_id}/tracks
      * https://developer.spotify.com/web-api/add-tracks-to-playlist/
      */
-    interface AddTracksToPlaylistResponse extends PlaylistSnapshotResponse {}
+    interface AddTracksToPlaylistResponse extends PlaylistSnapshotResponse { }
 
     /**
      * Remove Tracks from a Playlist
@@ -610,7 +618,7 @@ declare namespace SpotifyApi {
      * DELETE /v1/users/{user_id}/playlists/{playlist_id}/tracks
      * https://developer.spotify.com/web-api/remove-tracks-playlist/
      */
-    interface RemoveTracksFromPlaylistResponse extends PlaylistSnapshotResponse {}
+    interface RemoveTracksFromPlaylistResponse extends PlaylistSnapshotResponse { }
 
     /**
      * Reorder a Playlist’s Tracks
@@ -618,7 +626,7 @@ declare namespace SpotifyApi {
      * PUT /v1/users/{user_id}/playlists/{playlist_id}/tracks
      * https://developer.spotify.com/web-api/reorder-playlists-tracks/
      */
-    interface ReorderPlaylistTracksResponse extends PlaylistSnapshotResponse {}
+    interface ReorderPlaylistTracksResponse extends PlaylistSnapshotResponse { }
 
     /**
      * Replace a Playlist’s Tracks
@@ -626,7 +634,7 @@ declare namespace SpotifyApi {
      * PUT /v1/users/{user_id}/playlists/{playlist_id}/tracks
      * https://developer.spotify.com/web-api/replace-playlists-tracks/
      */
-    interface ReplacePlaylistTracksResponse extends VoidResponse {}
+    interface ReplacePlaylistTracksResponse extends VoidResponse { }
 
     /**
      * Upload a Custom Playlist Cover Image
@@ -634,7 +642,7 @@ declare namespace SpotifyApi {
      * PUT /v1/users/{user_id}/playlists/{playlist_id}/images
      * https://developer.spotify.com/web-api/upload-a-custom-playlist-cover-image/
      */
-    interface UploadCustomPlaylistCoverImageReponse extends VoidResponse {}
+    interface UploadCustomPlaylistCoverImageReponse extends VoidResponse { }
 
     /**
      * Check if Users Follow a Playlist
@@ -642,15 +650,15 @@ declare namespace SpotifyApi {
      * GET /v1/users/{user_id}/playlists/{playlist_id}/followers/contains
      * https://developer.spotify.com/web-api/check-user-following-playlist/
      */
-    interface UsersFollowPlaylistReponse extends Array<boolean> {}
+    interface UsersFollowPlaylistReponse extends Array<boolean> { }
 
     interface UserDevicesResponse {
         devices: UserDevice[];
     }
 
-    interface CurrentPlaybackResponse extends CurrentlyPlayingObject, PlaybackObject {}
+    interface CurrentPlaybackResponse extends CurrentlyPlayingObject, PlaybackObject { }
 
-    interface CurrentlyPlayingResponse extends CurrentlyPlayingObject {}
+    interface CurrentlyPlayingResponse extends CurrentlyPlayingObject { }
 
     //
     // Objects from the Object Models of the Spotify Web Api, ordered alphabetically.
@@ -662,14 +670,12 @@ declare namespace SpotifyApi {
      * [album object (full)](https://developer.spotify.com/web-api/object-model/#album-object-simplified)
      */
     interface AlbumObjectFull extends AlbumObjectSimplified {
-        artists: ArtistObjectSimplified[],
         copyrights: CopyrightObject[],
         external_ids: ExternalIdObject,
         genres: string[],
+        label: string,
         popularity: number,
-        release_date: string,
-        release_date_precision: string,
-        tracks: PagingObject<TrackObjectSimplified>,
+        tracks: PagingObject<TrackObjectSimplified>
     }
 
     /**
@@ -677,13 +683,18 @@ declare namespace SpotifyApi {
      * [album object (simplified)](https://developer.spotify.com/web-api/object-model/#album-object-simplified)
      */
     interface AlbumObjectSimplified {
+        album_group?: string,
         album_type: string,
+        artists: ArtistObjectSimplified[],
         available_markets?: string[],
         external_urls: ExternalUrlObject,
         href: string,
         id: string,
         images: ImageObject[],
         name: string,
+        release_date: string,
+        release_date_precision: string,
+        restrictions?: RestrictionsObject,
         type: "album",
         uri: string
     }

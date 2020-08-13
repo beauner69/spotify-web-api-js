@@ -5,25 +5,25 @@ const Fetch = require("cross-fetch");
 /**
  * Class representing the API
  */
-var SpotifyWebApi = (function() {
+var SpotifyWebApi = (function () {
   var _baseUri = "https://api.spotify.com/v1";
   var _accessToken = null;
   var _promiseImplementation = null;
 
-  var WrapPromiseWithAbort = function(promise, onAbort) {
+  var WrapPromiseWithAbort = function (promise, onAbort) {
     promise.abort = onAbort;
     return promise;
   };
 
-  var _promiseProvider = function(promiseFunction, onAbort) {
+  var _promiseProvider = function (promiseFunction, onAbort) {
     var returnedPromise;
     if (_promiseImplementation !== null) {
       var deferred = _promiseImplementation.defer();
       promiseFunction(
-        function(resolvedResult) {
+        function (resolvedResult) {
           deferred.resolve(resolvedResult);
         },
-        function(rejectedResult) {
+        function (rejectedResult) {
           deferred.reject(rejectedResult);
         }
       );
@@ -41,12 +41,12 @@ var SpotifyWebApi = (function() {
     }
   };
 
-  var _extend = function() {
+  var _extend = function () {
     var args = Array.prototype.slice.call(arguments);
     var target = args[0];
     var objects = args.slice(1);
     target = target || {};
-    objects.forEach(function(object) {
+    objects.forEach(function (object) {
       for (var j in object) {
         if (object.hasOwnProperty(j)) {
           target[j] = object[j];
@@ -56,7 +56,7 @@ var SpotifyWebApi = (function() {
     return target;
   };
 
-  var _buildUrl = function(url, parameters) {
+  var _buildUrl = function (url, parameters) {
     var qs = "";
     for (var key in parameters) {
       if (parameters.hasOwnProperty(key)) {
@@ -73,7 +73,7 @@ var SpotifyWebApi = (function() {
   };
 
   // BNC: Just had to change this fn to use cross-fetch instead
-  var _performRequest = function(requestData, callback) {
+  var _performRequest = async function (requestData, callback) {
     var type = requestData.type || "GET";
 
     var fetchSettings = {
@@ -99,18 +99,26 @@ var SpotifyWebApi = (function() {
       }
     }
 
-    return Fetch(url, fetchSettings)
-      .then(response => {
-        return response.json();
-      })
-      .then(json => {
-        if (callback) callback(json);
-        if (json.error !== undefined)
-          throw new Error(
-            "Spotify: " + json.error.message + " / " + json.error.status
-          );
-        return json;
-      });
+    const response = await Fetch(url, fetchSettings);
+
+    console.log("TRACKIFY: Response = ", response);
+    console.log("TRACKIFY: Calling JSON");
+    try {
+      const json = await response.json();
+      console.log("TRACKIFY: JSON OKAY");
+      if (callback) callback(json);
+      if (json.error !== undefined)
+        throw new Error(
+          "Spotify: " + json.error.message + " / " + json.error.status
+        );
+      return json;
+    } catch (e) {
+      if (response.ok) {
+        if (url.indexOf("me/player/play") !== -1) return {};
+        if (url.indexOf("me/player/seek") !== -1) return {};
+      }
+      throw e;
+    }
   };
 
   // var _performRequestOld = function(requestData, callback) {
@@ -185,7 +193,7 @@ var SpotifyWebApi = (function() {
   //   }
   // };
 
-  var _checkParamsAndPerformRequest = function(
+  var _checkParamsAndPerformRequest = function (
     requestData,
     options,
     callback,
@@ -215,7 +223,7 @@ var SpotifyWebApi = (function() {
    * Creates an instance of the wrapper
    * @constructor
    */
-  var Constr = function() {};
+  var Constr = function () {};
 
   Constr.prototype = {
     constructor: SpotifyWebApi,
@@ -228,7 +236,7 @@ var SpotifyWebApi = (function() {
    * @param {function(Object,Object)} callback An optional callback
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getGeneric = function(url, callback) {
+  Constr.prototype.getGeneric = function (url, callback) {
     var requestData = {
       url: url,
     };
@@ -245,7 +253,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMe = function(options, callback) {
+  Constr.prototype.getMe = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me",
     };
@@ -262,7 +270,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMySavedTracks = function(options, callback) {
+  Constr.prototype.getMySavedTracks = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/tracks",
     };
@@ -281,7 +289,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.addToMySavedTracks = function(trackIds, options, callback) {
+  Constr.prototype.addToMySavedTracks = function (trackIds, options, callback) {
     var requestData = {
       url: _baseUri + "/me/tracks",
       type: "PUT",
@@ -302,7 +310,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.removeFromMySavedTracks = function(
+  Constr.prototype.removeFromMySavedTracks = function (
     trackIds,
     options,
     callback
@@ -327,7 +335,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.containsMySavedTracks = function(
+  Constr.prototype.containsMySavedTracks = function (
     trackIds,
     options,
     callback
@@ -349,7 +357,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMySavedAlbums = function(options, callback) {
+  Constr.prototype.getMySavedAlbums = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/albums",
     };
@@ -368,7 +376,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.addToMySavedAlbums = function(albumIds, options, callback) {
+  Constr.prototype.addToMySavedAlbums = function (albumIds, options, callback) {
     var requestData = {
       url: _baseUri + "/me/albums",
       type: "PUT",
@@ -389,7 +397,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.removeFromMySavedAlbums = function(
+  Constr.prototype.removeFromMySavedAlbums = function (
     albumIds,
     options,
     callback
@@ -414,7 +422,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.containsMySavedAlbums = function(
+  Constr.prototype.containsMySavedAlbums = function (
     albumIds,
     options,
     callback
@@ -436,7 +444,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMyTopArtists = function(options, callback) {
+  Constr.prototype.getMyTopArtists = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/top/artists",
     };
@@ -453,7 +461,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMyTopTracks = function(options, callback) {
+  Constr.prototype.getMyTopTracks = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/top/tracks",
     };
@@ -470,7 +478,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMyRecentlyPlayedTracks = function(options, callback) {
+  Constr.prototype.getMyRecentlyPlayedTracks = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/player/recently-played",
     };
@@ -488,7 +496,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is an empty value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.followUsers = function(userIds, callback) {
+  Constr.prototype.followUsers = function (userIds, callback) {
     var requestData = {
       url: _baseUri + "/me/following/",
       type: "PUT",
@@ -511,7 +519,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is an empty value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.followArtists = function(artistIds, callback) {
+  Constr.prototype.followArtists = function (artistIds, callback) {
     var requestData = {
       url: _baseUri + "/me/following/",
       type: "PUT",
@@ -536,7 +544,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is an empty value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.followPlaylist = function(playlistId, options, callback) {
+  Constr.prototype.followPlaylist = function (playlistId, options, callback) {
     var requestData = {
       url: _baseUri + "/playlists/" + playlistId + "/followers",
       type: "PUT",
@@ -557,7 +565,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is an empty value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.unfollowUsers = function(userIds, callback) {
+  Constr.prototype.unfollowUsers = function (userIds, callback) {
     var requestData = {
       url: _baseUri + "/me/following/",
       type: "DELETE",
@@ -580,7 +588,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is an empty value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.unfollowArtists = function(artistIds, callback) {
+  Constr.prototype.unfollowArtists = function (artistIds, callback) {
     var requestData = {
       url: _baseUri + "/me/following/",
       type: "DELETE",
@@ -603,7 +611,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is an empty value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.unfollowPlaylist = function(playlistId, callback) {
+  Constr.prototype.unfollowPlaylist = function (playlistId, callback) {
     var requestData = {
       url: _baseUri + "/playlists/" + playlistId + "/followers",
       type: "DELETE",
@@ -623,7 +631,7 @@ var SpotifyWebApi = (function() {
    * whether the user is following the users sent in the request.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.isFollowingUsers = function(userIds, callback) {
+  Constr.prototype.isFollowingUsers = function (userIds, callback) {
     var requestData = {
       url: _baseUri + "/me/following/contains",
       type: "GET",
@@ -647,7 +655,7 @@ var SpotifyWebApi = (function() {
    * whether the user is following the artists sent in the request.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.isFollowingArtists = function(artistIds, callback) {
+  Constr.prototype.isFollowingArtists = function (artistIds, callback) {
     var requestData = {
       url: _baseUri + "/me/following/contains",
       type: "GET",
@@ -673,7 +681,7 @@ var SpotifyWebApi = (function() {
    * whether the users are following the playlist sent in the request.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.areFollowingPlaylist = function(
+  Constr.prototype.areFollowingPlaylist = function (
     playlistId,
     userIds,
     callback
@@ -700,7 +708,7 @@ var SpotifyWebApi = (function() {
    * @returns {Promise|undefined} A promise that if successful, resolves to an object containing a paging object which contains
    * artists objects. Not returned if a callback is given.
    */
-  Constr.prototype.getFollowedArtists = function(options, callback) {
+  Constr.prototype.getFollowedArtists = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/following",
       type: "GET",
@@ -723,7 +731,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getUser = function(userId, options, callback) {
+  Constr.prototype.getUser = function (userId, options, callback) {
     var requestData = {
       url: _baseUri + "/users/" + encodeURIComponent(userId),
     };
@@ -743,7 +751,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getUserPlaylists = function(userId, options, callback) {
+  Constr.prototype.getUserPlaylists = function (userId, options, callback) {
     var requestData;
     if (typeof userId === "string") {
       requestData = {
@@ -771,7 +779,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getPlaylist = function(playlistId, options, callback) {
+  Constr.prototype.getPlaylist = function (playlistId, options, callback) {
     var requestData = {
       url: _baseUri + "/playlists/" + playlistId,
     };
@@ -790,7 +798,11 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getPlaylistTracks = function(playlistId, options, callback) {
+  Constr.prototype.getPlaylistTracks = function (
+    playlistId,
+    options,
+    callback
+  ) {
     var requestData = {
       url: _baseUri + "/playlists/" + playlistId + "/tracks",
     };
@@ -809,7 +821,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.createPlaylist = function(userId, options, callback) {
+  Constr.prototype.createPlaylist = function (userId, options, callback) {
     var requestData = {
       url: _baseUri + "/users/" + encodeURIComponent(userId) + "/playlists",
       type: "POST",
@@ -830,7 +842,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.changePlaylistDetails = function(
+  Constr.prototype.changePlaylistDetails = function (
     playlistId,
     data,
     callback
@@ -856,7 +868,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.addTracksToPlaylist = function(
+  Constr.prototype.addTracksToPlaylist = function (
     playlistId,
     uris,
     options,
@@ -884,7 +896,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.replaceTracksInPlaylist = function(
+  Constr.prototype.replaceTracksInPlaylist = function (
     playlistId,
     uris,
     callback
@@ -912,7 +924,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.reorderTracksInPlaylist = function(
+  Constr.prototype.reorderTracksInPlaylist = function (
     playlistId,
     rangeStart,
     insertBefore,
@@ -946,12 +958,12 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.removeTracksFromPlaylist = function(
+  Constr.prototype.removeTracksFromPlaylist = function (
     playlistId,
     uris,
     callback
   ) {
-    var dataToBeSent = uris.map(function(uri) {
+    var dataToBeSent = uris.map(function (uri) {
       if (typeof uri === "string") {
         return { uri: uri };
       } else {
@@ -982,13 +994,13 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.removeTracksFromPlaylistWithSnapshotId = function(
+  Constr.prototype.removeTracksFromPlaylistWithSnapshotId = function (
     playlistId,
     uris,
     snapshotId,
     callback
   ) {
-    var dataToBeSent = uris.map(function(uri) {
+    var dataToBeSent = uris.map(function (uri) {
       if (typeof uri === "string") {
         return { uri: uri };
       } else {
@@ -1022,7 +1034,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.removeTracksFromPlaylistInPositions = function(
+  Constr.prototype.removeTracksFromPlaylistInPositions = function (
     playlistId,
     positions,
     snapshotId,
@@ -1053,7 +1065,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.uploadCustomPlaylistCoverImage = function(
+  Constr.prototype.uploadCustomPlaylistCoverImage = function (
     playlistId,
     imageData,
     callback
@@ -1079,7 +1091,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getAlbum = function(albumId, options, callback) {
+  Constr.prototype.getAlbum = function (albumId, options, callback) {
     var requestData = {
       url: _baseUri + "/albums/" + albumId,
     };
@@ -1098,7 +1110,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getAlbumTracks = function(albumId, options, callback) {
+  Constr.prototype.getAlbumTracks = function (albumId, options, callback) {
     var requestData = {
       url: _baseUri + "/albums/" + albumId + "/tracks",
     };
@@ -1117,7 +1129,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getAlbums = function(albumIds, options, callback) {
+  Constr.prototype.getAlbums = function (albumIds, options, callback) {
     var requestData = {
       url: _baseUri + "/albums/",
       params: { ids: albumIds.join(",") },
@@ -1137,7 +1149,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getTrack = function(trackId, options, callback) {
+  Constr.prototype.getTrack = function (trackId, options, callback) {
     var requestData = {};
     requestData.url = _baseUri + "/tracks/" + trackId;
     return _checkParamsAndPerformRequest(requestData, options, callback);
@@ -1155,7 +1167,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getTracks = function(trackIds, options, callback) {
+  Constr.prototype.getTracks = function (trackIds, options, callback) {
     var requestData = {
       url: _baseUri + "/tracks/",
       params: { ids: trackIds.join(",") },
@@ -1175,7 +1187,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getArtist = function(artistId, options, callback) {
+  Constr.prototype.getArtist = function (artistId, options, callback) {
     var requestData = {
       url: _baseUri + "/artists/" + artistId,
     };
@@ -1194,7 +1206,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getArtists = function(artistIds, options, callback) {
+  Constr.prototype.getArtists = function (artistIds, options, callback) {
     var requestData = {
       url: _baseUri + "/artists/",
       params: { ids: artistIds.join(",") },
@@ -1214,7 +1226,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getArtistAlbums = function(artistId, options, callback) {
+  Constr.prototype.getArtistAlbums = function (artistId, options, callback) {
     var requestData = {
       url: _baseUri + "/artists/" + artistId + "/albums",
     };
@@ -1234,7 +1246,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getArtistTopTracks = function(
+  Constr.prototype.getArtistTopTracks = function (
     artistId,
     countryId,
     options,
@@ -1259,7 +1271,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getArtistRelatedArtists = function(
+  Constr.prototype.getArtistRelatedArtists = function (
     artistId,
     options,
     callback
@@ -1280,7 +1292,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getFeaturedPlaylists = function(options, callback) {
+  Constr.prototype.getFeaturedPlaylists = function (options, callback) {
     var requestData = {
       url: _baseUri + "/browse/featured-playlists",
     };
@@ -1297,7 +1309,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getNewReleases = function(options, callback) {
+  Constr.prototype.getNewReleases = function (options, callback) {
     var requestData = {
       url: _baseUri + "/browse/new-releases",
     };
@@ -1314,7 +1326,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getCategories = function(options, callback) {
+  Constr.prototype.getCategories = function (options, callback) {
     var requestData = {
       url: _baseUri + "/browse/categories",
     };
@@ -1332,7 +1344,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getCategory = function(categoryId, options, callback) {
+  Constr.prototype.getCategory = function (categoryId, options, callback) {
     var requestData = {
       url: _baseUri + "/browse/categories/" + categoryId,
     };
@@ -1350,7 +1362,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getCategoryPlaylists = function(
+  Constr.prototype.getCategoryPlaylists = function (
     categoryId,
     options,
     callback
@@ -1374,7 +1386,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.search = function(query, types, options, callback) {
+  Constr.prototype.search = function (query, types, options, callback) {
     var requestData = {
       url: _baseUri + "/search/",
       params: {
@@ -1396,7 +1408,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.searchAlbums = function(query, options, callback) {
+  Constr.prototype.searchAlbums = function (query, options, callback) {
     return this.search(query, ["album"], options, callback);
   };
 
@@ -1411,7 +1423,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.searchArtists = function(query, options, callback) {
+  Constr.prototype.searchArtists = function (query, options, callback) {
     return this.search(query, ["artist"], options, callback);
   };
 
@@ -1426,7 +1438,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.searchTracks = function(query, options, callback) {
+  Constr.prototype.searchTracks = function (query, options, callback) {
     return this.search(query, ["track"], options, callback);
   };
 
@@ -1441,7 +1453,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.searchPlaylists = function(query, options, callback) {
+  Constr.prototype.searchPlaylists = function (query, options, callback) {
     return this.search(query, ["playlist"], options, callback);
   };
 
@@ -1456,7 +1468,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getAudioFeaturesForTrack = function(trackId, callback) {
+  Constr.prototype.getAudioFeaturesForTrack = function (trackId, callback) {
     var requestData = {};
     requestData.url = _baseUri + "/audio-features/" + trackId;
     return _checkParamsAndPerformRequest(requestData, {}, callback);
@@ -1473,7 +1485,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getAudioFeaturesForTracks = function(trackIds, callback) {
+  Constr.prototype.getAudioFeaturesForTracks = function (trackIds, callback) {
     var requestData = {
       url: _baseUri + "/audio-features",
       params: { ids: trackIds },
@@ -1492,7 +1504,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getAudioAnalysisForTrack = function(trackId, callback) {
+  Constr.prototype.getAudioAnalysisForTrack = function (trackId, callback) {
     var requestData = {};
     requestData.url = _baseUri + "/audio-analysis/" + trackId;
     return _checkParamsAndPerformRequest(requestData, {}, callback);
@@ -1508,7 +1520,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getRecommendations = function(options, callback) {
+  Constr.prototype.getRecommendations = function (options, callback) {
     var requestData = {
       url: _baseUri + "/recommendations",
     };
@@ -1524,7 +1536,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getAvailableGenreSeeds = function(callback) {
+  Constr.prototype.getAvailableGenreSeeds = function (callback) {
     var requestData = {
       url: _baseUri + "/recommendations/available-genre-seeds",
     };
@@ -1540,7 +1552,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMyDevices = function(callback) {
+  Constr.prototype.getMyDevices = function (callback) {
     var requestData = {
       url: _baseUri + "/me/player/devices",
     };
@@ -1557,7 +1569,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMyCurrentPlaybackState = function(options, callback) {
+  Constr.prototype.getMyCurrentPlaybackState = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/player",
     };
@@ -1574,7 +1586,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.getMyCurrentPlayingTrack = function(options, callback) {
+  Constr.prototype.getMyCurrentPlayingTrack = function (options, callback) {
     var requestData = {
       url: _baseUri + "/me/player/currently-playing",
     };
@@ -1592,7 +1604,11 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.transferMyPlayback = function(deviceIds, options, callback) {
+  Constr.prototype.transferMyPlayback = function (
+    deviceIds,
+    options,
+    callback
+  ) {
     var postData = options || {};
     postData.device_ids = deviceIds;
     var requestData = {
@@ -1613,12 +1629,12 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.play = function(options, callback) {
+  Constr.prototype.play = function (options, callback) {
     options = options || {};
     var params =
       "device_id" in options ? { device_id: options.device_id } : null;
     var postData = {};
-    ["context_uri", "uris", "offset", "position_ms"].forEach(function(field) {
+    ["context_uri", "uris", "offset", "position_ms"].forEach(function (field) {
       if (field in options) {
         postData[field] = options[field];
       }
@@ -1645,7 +1661,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.pause = function(options, callback) {
+  Constr.prototype.pause = function (options, callback) {
     options = options || {};
     var params =
       "device_id" in options ? { device_id: options.device_id } : null;
@@ -1667,7 +1683,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.skipToNext = function(options, callback) {
+  Constr.prototype.skipToNext = function (options, callback) {
     options = options || {};
     var params =
       "device_id" in options ? { device_id: options.device_id } : null;
@@ -1691,7 +1707,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.skipToPrevious = function(options, callback) {
+  Constr.prototype.skipToPrevious = function (options, callback) {
     options = options || {};
     var params =
       "device_id" in options ? { device_id: options.device_id } : null;
@@ -1714,7 +1730,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.seek = function(position_ms, options, callback) {
+  Constr.prototype.seek = function (position_ms, options, callback) {
     options = options || {};
     var params = {
       position_ms: position_ms,
@@ -1741,7 +1757,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.setRepeat = function(state, options, callback) {
+  Constr.prototype.setRepeat = function (state, options, callback) {
     options = options || {};
     var params = {
       state: state,
@@ -1768,7 +1784,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.setVolume = function(volume_percent, options, callback) {
+  Constr.prototype.setVolume = function (volume_percent, options, callback) {
     options = options || {};
     var params = {
       volume_percent: volume_percent,
@@ -1795,7 +1811,7 @@ var SpotifyWebApi = (function() {
    * one is the error object (null if no error), and the second is the value if the request succeeded.
    * @return {Object} Null if a callback is provided, a `Promise` object otherwise
    */
-  Constr.prototype.setShuffle = function(state, options, callback) {
+  Constr.prototype.setShuffle = function (state, options, callback) {
     options = options || {};
     var params = {
       state: state,
@@ -1816,7 +1832,7 @@ var SpotifyWebApi = (function() {
    *
    * @return {string} accessToken The access token
    */
-  Constr.prototype.getAccessToken = function() {
+  Constr.prototype.getAccessToken = function () {
     return _accessToken;
   };
 
@@ -1828,7 +1844,7 @@ var SpotifyWebApi = (function() {
    * @param {string} accessToken The access token
    * @return {void}
    */
-  Constr.prototype.setAccessToken = function(accessToken) {
+  Constr.prototype.setAccessToken = function (accessToken) {
     _accessToken = accessToken;
   };
 
@@ -1841,10 +1857,10 @@ var SpotifyWebApi = (function() {
    * @throws {Error} If the implementation being set doesn't conform with Promises/A+
    * @return {void}
    */
-  Constr.prototype.setPromiseImplementation = function(PromiseImplementation) {
+  Constr.prototype.setPromiseImplementation = function (PromiseImplementation) {
     var valid = false;
     try {
-      var p = new PromiseImplementation(function(resolve) {
+      var p = new PromiseImplementation(function (resolve) {
         resolve();
       });
       if (typeof p.then === "function" && typeof p.catch === "function") {

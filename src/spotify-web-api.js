@@ -101,11 +101,8 @@ var SpotifyWebApi = (function () {
 
     const response = await Fetch(url, fetchSettings);
 
-    console.log("TRACKIFY: Response = ", response);
-    console.log("TRACKIFY: Calling JSON");
     try {
       const json = await response.json();
-      console.log("TRACKIFY: JSON OKAY");
       if (callback) callback(json);
       if (json.error !== undefined)
         throw new Error(

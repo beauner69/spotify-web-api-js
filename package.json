@@ -1,7 +1,7 @@
 {
   "name": "@zerolabs/spotify-web-api-js",
   "description": "A client-side JS wrapper for the Spotify Web API. Forked to make it react friendly perhaps.",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "homepage": "https://github.com/JMPerez/spotify-web-api-js",
   "author": {
     "name": "José M. Pérez"
